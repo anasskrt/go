@@ -30,3 +30,17 @@ func (a *App) getStation(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, st)
 }
+
+func (a *App) createStation(w http.ResponseWriter, r *http.Request) {
+	var st Station
+	if err := json.NewDecoder(r.Body).Decode(&st); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+	if a.store.Has(st.ID) {
+		writeError(w, http.StatusConflict, "station already exists")
+		return
+	}
+	a.store.Put(st)
+	writeJSON(w, http.StatusCreated, st)
+}
